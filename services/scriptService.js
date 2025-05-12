@@ -227,9 +227,9 @@ async function generateVideo(imageUrl, videoPrompt) {
     const videoUrl = response.data.videoUrl; // הנח שה־API מחזיר את כתובת הווידאו כאן
     return videoUrl;
   } catch (error) {
-    console.error('שגיאה ביצירת הווידאו:', error.response?.data || error.message);
-    throw new Error('יצירת הווידאו נכשלה');
-  }
+  console.error('🛑 Runway API Error:', error.response?.data || error.message);
+  throw new Error('Video generation failed');
+}
 }
 
 
