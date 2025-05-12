@@ -5,6 +5,7 @@ const {
   breakdownToScenes,
   generateImagePrompt,
   generateVideoPrompt,
+  generateVideoPromptsForImages,
   generateImage,
   generateImagesForScenes,
   generateVideo,
@@ -52,6 +53,23 @@ router.post('/generate-video-prompt', async (req, res) => {
     res.status(500).json({ error: 'Failed to generate video prompt' });
   }
 });
+
+router.post('/generate-video-prompts', async (req, res) => {
+  const { images } = req.body;
+
+  if (!images || !Array.isArray(images)) {
+    return res.status(400).json({ error: 'Missing images array' });
+  }
+
+  try {
+    const videoData = await generateVideoPromptsForImages(images);
+    res.json({ videos: videoData });
+  } catch (error) {
+    console.error('❌ Failed generating video prompts:', error);
+    res.status(500).json({ error: 'Video prompt generation failed' });
+  }
+});
+
 
 router.post('/generate-image', async (req, res) => {
   const { sceneText } = req.body;
