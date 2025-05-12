@@ -6,6 +6,7 @@ const {
   generateImagePrompt,
   generateVideoPrompt,
   generateImage,
+  generateImagesForScenes,
   generateVideo,
   mergeVideos
 } = require('../services/scriptService');
@@ -60,6 +61,22 @@ router.post('/generate-image', async (req, res) => {
     res.json({ imageUrl, prompt: imagePrompt });
   } catch (error) {
     res.status(500).json({ error: 'Failed to generate image' });
+  }
+});
+
+router.post('/generate-images', async (req, res) => {
+  const { scenes } = req.body;
+
+  if (!scenes || !Array.isArray(scenes)) {
+    return res.status(400).json({ error: 'Missing scenes array' });
+  }
+
+  try {
+    const images = await generateImagesForScenes(scenes);
+    res.json({ images });
+  } catch (error) {
+    console.error('❌ Failed generating images:', error);
+    res.status(500).json({ error: 'Image generation failed' });
   }
 });
 
