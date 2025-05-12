@@ -8,21 +8,48 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-async function generateScripts(description) {
-  const prompt = `You are a professional marketing copywriter. Create exactly **2 separate short ad scripts** for the following business:\n\n"${description}"\n\nEach script should be clearly separated and include multiple scenes.`;
+async function generateScriptsByLanguage(lang, description) {
+  const prompts = {
+    en: {
+      system: "You write engaging, short, structured video scripts for ads.",
+      user: `You are a professional video scriptwriter. Write 2 short ad scripts for a business described as: "${description}"
+
+Instructions:
+- Each script should include 3–5 short scenes.
+- Each scene should be clearly numbered (e.g., Scene 1, Scene 2) and described visually.
+- Separate each script with a clear header like "SCRIPT 1" and "SCRIPT 2".
+- Be concise and creative. Assume the video will be 30–45 seconds long.`
+    },
+    he: {
+      system: "אתה כותב תסריטים קצרים, שיווקיים וברורים לסרטוני וידאו.",
+      user: `כתוב 2 תסריטים קצרים עבור עסק מסוג: "${description}"
+
+הנחיות:
+- כל תסריט יכיל 3–5 סצנות ממוספרות (1, 2, 3 וכו’)
+- כל סצנה תתאר תמונה או פעולה בצורה חזותית
+- הפרד בין התסריטים בעזרת כותרת כמו "תסריט 1" ו"תסריט 2"
+- כתוב בעברית פשוטה וברורה כאילו הסרטון באורך חצי דקה`
+    }
+  };
+
+  const p = prompts[lang] || prompts.en;
 
   const response = await openai.chat.completions.create({
     model: 'gpt-4',
     temperature: 0.7,
-    max_tokens: 800,
+    max_tokens: 1000,
     messages: [
-      { role: 'system', content: 'You write structured marketing video scripts' },
-      { role: 'user', content: prompt }
+      { role: 'system', content: p.system },
+      { role: 'user', content: p.user }
     ]
   });
 
   const content = response.choices[0].message.content;
-  return content.split(/\n\n+/).slice(0, 2);
+
+  // פיצול לפי "SCRIPT" או "תסריט" בהתאם לשפה
+  const splitRegex = lang === 'he' ? /תסריט\s?\d/gi : /SCRIPT\s?\d/gi;
+
+  return content.split(splitRegex).map(s => s.trim()).filter(s => s.length > 0);
 }
 
 async function breakdownToScenes(script) {
