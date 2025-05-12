@@ -11,24 +11,57 @@ const openai = new OpenAI({
 async function generateScriptsByLanguage(lang, description) {
   const prompts = {
     en: {
-      system: "You write engaging, short, structured video scripts for ads.",
-      user: `You are a professional video scriptwriter. Write 2 short ad scripts for a business described as: "${description}"
+      system: "You write structured ad scripts and return them as JSON.",
+      user: `Write 2 short marketing video scripts for a business: "${description}"
 
-Instructions:
-- Each script should include 3–5 short scenes.
-- Each scene should be clearly numbered (e.g., Scene 1, Scene 2) and described visually.
-- Separate each script with a clear header like "SCRIPT 1" and "SCRIPT 2".
-- Be concise and creative. Assume the video will be 30–45 seconds long.`
+Return the result in the following JSON format:
+
+{
+  "scripts": [
+    {
+      "title": "Script 1",
+      "scenes": [
+        "Scene 1: ...",
+        "Scene 2: ...",
+        "Scene 3: ..."
+      ]
+    },
+    {
+      "title": "Script 2",
+      "scenes": [
+        "Scene 1: ...",
+        "Scene 2: ...",
+        "Scene 3: ..."
+      ]
+    }
+  ]
+}
+
+- Each scene should be short and visually described
+- Limit to 3–5 scenes per script
+- Do NOT include explanations or text outside the JSON object.`
     },
     he: {
-      system: "אתה כותב תסריטים קצרים, שיווקיים וברורים לסרטוני וידאו.",
-      user: `כתוב 2 תסריטים קצרים עבור עסק מסוג: "${description}"
+      system: "אתה מחזיר תסריטים שיווקיים כתובים בפורמט JSON בלבד.",
+      user: `כתוב 2 תסריטים שיווקיים קצרים לעסק: "${description}"
 
-הנחיות:
-- כל תסריט יכיל 3–5 סצנות ממוספרות (1, 2, 3 וכו’)
-- כל סצנה תתאר תמונה או פעולה בצורה חזותית
-- הפרד בין התסריטים בעזרת כותרת כמו "תסריט 1" ו"תסריט 2"
-- כתוב בעברית פשוטה וברורה כאילו הסרטון באורך חצי דקה`
+החזר תשובה בפורמט JSON בלבד כך:
+
+{
+  "scripts": [
+    {
+      "title": "תסריט 1",
+      "scenes": ["סצנה 1: ...", "סצנה 2: ..."]
+    },
+    {
+      "title": "תסריט 2",
+      "scenes": ["סצנה 1: ...", "סצנה 2: ..."]
+    }
+  ]
+}
+
+- אל תכתוב הסברים או טקסט חיצוני – רק JSON תקני
+- כל סצנה צריכה להיות קצרה ותיאורית`
     }
   };
 
@@ -44,13 +77,18 @@ Instructions:
     ]
   });
 
-  const content = response.choices[0].message.content;
+  const rawContent = response.choices[0].message.content;
 
-  // פיצול לפי "SCRIPT" או "תסריט" בהתאם לשפה
-  const splitRegex = lang === 'he' ? /תסריט\s?\d/gi : /SCRIPT\s?\d/gi;
-
-  return content.split(splitRegex).map(s => s.trim()).filter(s => s.length > 0);
+  // מנסה לפענח JSON מתוך התשובה
+  try {
+    const parsed = JSON.parse(rawContent);
+    return parsed.scripts || [];
+  } catch (err) {
+    console.error('⚠️ Failed to parse JSON from GPT:', err);
+    return [];
+  }
 }
+
 
 async function breakdownToScenes(script, lang = 'en') {
   const prompt = lang === 'he'
