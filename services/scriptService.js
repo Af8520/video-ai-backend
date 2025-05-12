@@ -117,7 +117,7 @@ async function mergeVideos(videoPaths, outputName = 'final_output.mp4') {
 }
 
 module.exports = {
-  generateScripts,
+  generateScriptsByLanguage,
   breakdownToScenes,
   generateImagePrompt,
   generateVideoPrompt,
