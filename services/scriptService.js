@@ -270,6 +270,23 @@ async function pollRunwayForVideoUrl(id, maxAttempts = 20, intervalMs = 3000) {
   throw new Error('Video generation timed out');
 }
 
+async function generateVideoViaMake(imageUrl, videoPrompt) {
+  const webhookUrl = 'https://hook.eu2.make.com/67ikod2tfa7oujcx49vmd42tyxr213kt'; // ← ה-Webhook שלך
+
+  try {
+    const response = await axios.post(webhookUrl, {
+      prompt: videoPrompt,
+      imageUrl: imageUrl
+    });
+
+    const [videoUrl] = response.data; // כי זה מגיע כמערך
+    return videoUrl;
+
+  } catch (error) {
+    console.error('❌ Error calling Make webhook:', error.response?.data || error.message);
+    throw new Error('Video generation via Make failed');
+  }
+}
 
 
 
@@ -297,5 +314,6 @@ module.exports = {
   generateVideoPromptsForImages,
   generateVideo,
   pollRunwayForVideoUrl,
+  generateVideoViaMake,
   mergeVideos
 };
