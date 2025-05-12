@@ -206,10 +206,32 @@ async function generateImagesForScenes(scenes) {
 
 
 async function generateVideo(imageUrl, videoPrompt) {
-  // Placeholder – replace with actual Runway API integration
-  const mockUrl = `https://api.runwayml.com/generate?image=${encodeURIComponent(imageUrl)}&prompt=${encodeURIComponent(videoPrompt)}`;
-  return mockUrl;
+  const apiKey = process.env.RUNWAY_API_KEY; // ודא שה־API Key שלך מוגדר במשתני הסביבה
+  const endpoint = 'https://api.runwayml.com/v1/gen3-alpha-turbo';
+
+  const payload = {
+    promptText: videoPrompt,
+    promptImage: imageUrl,
+    duration: 5, // משך הווידאו בשניות (5 או 10)
+    ratio: '16:9' // יחס גובה-רוחב: '16:9' או '9:16'
+  };
+
+  try {
+    const response = await axios.post(endpoint, payload, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      }
+    });
+
+    const videoUrl = response.data.videoUrl; // הנח שה־API מחזיר את כתובת הווידאו כאן
+    return videoUrl;
+  } catch (error) {
+    console.error('שגיאה ביצירת הווידאו:', error.response?.data || error.message);
+    throw new Error('יצירת הווידאו נכשלה');
+  }
 }
+
 
 async function mergeVideos(videoPaths, outputName = 'final_output.mp4') {
   const tempListPath = path.join(__dirname, 'video_list.txt');
