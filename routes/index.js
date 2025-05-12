@@ -104,6 +104,7 @@ router.post('/generate-video', async (req, res) => {
   try {
     const videoPrompt = await generateVideoPrompt(imageDescription);
     const videoUrl = await generateVideoViaMake(imageUrl, videoPrompt);
+    console.log('🎬 Video URL from Make:', videoUrl);
     res.json({ videoUrl, prompt: videoPrompt });
   } catch (error) {
     res.status(500).json({ error: 'Failed to generate video' });
