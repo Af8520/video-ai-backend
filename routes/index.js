@@ -23,9 +23,9 @@ router.post('/generate-scripts', async (req, res) => {
 
 
 router.post('/breakdown-scenes', async (req, res) => {
-  const { selectedScript } = req.body;
+  const { selectedScript, lang = 'en' } = req.body;
   try {
-    const scenes = await breakdownToScenes(selectedScript);
+    const scenes = await breakdownToScenes(selectedScript, lang);
     res.json({ scenes });
   } catch (error) {
     res.status(500).json({ error: 'Failed to breakdown script into scenes' });
