@@ -220,7 +220,8 @@ async function generateVideo(imageUrl, videoPrompt) {
     const response = await axios.post(endpoint, payload, {
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'Authorization': `Bearer ${apiKey}`,
+        'X-Runway-API-Version': '2024-05-01'
       }
     });
 
