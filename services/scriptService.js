@@ -129,13 +129,37 @@ async function generateImagePrompt(sceneText) {
 }
 
 async function generateVideoPrompt(imageDescription) {
-  const prompt = `Convert the following image description into a short video generation prompt for Runway, including camera movement and visual effects:\n\n"${imageDescription}"`;
+  const prompt = `Create a short video generation prompt of 4-5 lines for Runway based on the following image description. Include dynamic camera movement, lighting, atmosphere, and visual flow:\n\n"${imageDescription}"`;
+
   const response = await openai.chat.completions.create({
     model: 'gpt-4',
-    messages: [{ role: 'user', content: prompt }],
+    messages: [{ role: 'user', content: prompt }]
   });
+
   return response.choices[0].message.content.trim();
 }
+
+async function generateVideoPromptsForImages(images) {
+  const result = [];
+
+  for (const image of images) {
+    try {
+      const videoPrompt = await generateVideoPrompt(image.prompt);
+      result.push({
+        sceneText: image.sceneText,
+        imageUrl: image.imageUrl,
+        imagePrompt: image.prompt,
+        videoPrompt
+      });
+    } catch (err) {
+      console.error(`❌ Failed for image prompt: ${image.prompt}`);
+      result.push({ ...image, error: true });
+    }
+  }
+
+  return result;
+}
+
 
 
 async function generateImage(imagePrompt) {
@@ -208,6 +232,7 @@ module.exports = {
   generateVideoPrompt,
   generateImage,
   generateImagesForScenes,
+  generateVideoPromptsForImages,
   generateVideo,
   mergeVideos
 };
