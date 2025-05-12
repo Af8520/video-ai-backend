@@ -106,7 +106,11 @@ async function breakdownToScenes(script, lang = 'en') {
   const content = response.choices[0].message.content;
   const splitRegex = lang === 'he' ? /\n(?=\d+\.\s)/ : /\n(?=Scene\s?\d)/i;
 
-  return content.split(splitRegex).map(s => s.trim());
+  return content
+  .split(/\n(?=\d+\.\s|Scene\s?\d)/i)
+  .map(s => s.trim())
+  .filter(s => s && !s.toLowerCase().startsWith("the script has already been"));
+
 }
 
 
