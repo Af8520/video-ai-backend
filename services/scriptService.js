@@ -9,11 +9,18 @@ const openai = new OpenAI({
 });
 
 async function generateScripts(description) {
-  const prompt = `You are a video scriptwriter. Create 2 short ad scripts for the following business: "${description}"`;
+  const prompt = `You are a professional marketing copywriter. Create exactly **2 separate short ad scripts** for the following business:\n\n"${description}"\n\nEach script should be clearly separated and include multiple scenes.`;
+
   const response = await openai.chat.completions.create({
     model: 'gpt-4',
-    messages: [{ role: 'user', content: prompt }],
+    temperature: 0.7,
+    max_tokens: 800,
+    messages: [
+      { role: 'system', content: 'You write structured marketing video scripts' },
+      { role: 'user', content: prompt }
+    ]
   });
+
   const content = response.choices[0].message.content;
   return content.split(/\n\n+/).slice(0, 2);
 }
