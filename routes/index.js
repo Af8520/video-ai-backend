@@ -11,14 +11,16 @@ const {
 } = require('../services/scriptService');
 
 router.post('/generate-scripts', async (req, res) => {
-  const { description } = req.body;
+  const { description, lang = 'en' } = req.body;
   try {
-    const scripts = await generateScripts(description);
+    const scripts = await generateScriptsByLanguage(lang, description);
     res.json({ scripts });
   } catch (error) {
+    console.error('Error in /generate-scripts:', error);
     res.status(500).json({ error: 'Failed to generate scripts' });
   }
 });
+
 
 router.post('/breakdown-scenes', async (req, res) => {
   const { selectedScript } = req.body;
