@@ -52,15 +52,25 @@ Instructions:
   return content.split(splitRegex).map(s => s.trim()).filter(s => s.length > 0);
 }
 
-async function breakdownToScenes(script) {
-  const prompt = `Break down the following ad script into clear individual video scenes. Number them and keep each scene short and visual:\n\n"${script}"`;
+async function breakdownToScenes(script, lang = 'en') {
+  const prompt = lang === 'he'
+    ? `פצל את התסריט הבא לסצנות ממוספרות לפי הפורמט: 1. 2. 3. כל סצנה תהיה תיאור קצר וויזואלי:\n\n"${script}"`
+    : `Break down the following ad script into clearly numbered short scenes (Scene 1, Scene 2, etc.):\n\n"${script}"`;
+
   const response = await openai.chat.completions.create({
     model: 'gpt-4',
-    messages: [{ role: 'user', content: prompt }],
+    messages: [
+      { role: 'system', content: 'You split scripts into numbered visual scenes' },
+      { role: 'user', content: prompt }
+    ]
   });
+
   const content = response.choices[0].message.content;
-  return content.split(/\n(?=\d+\.\s)/).map(s => s.trim());
+  const splitRegex = lang === 'he' ? /\n(?=\d+\.\s)/ : /\n(?=Scene\s?\d)/i;
+
+  return content.split(splitRegex).map(s => s.trim());
 }
+
 
 async function generateImagePrompt(sceneText) {
   const prompt = `Describe the following scene in a single sentence suitable for AI image generation (Ideogram):\n\n"${sceneText}"`;
