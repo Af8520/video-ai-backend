@@ -9,6 +9,7 @@ const {
   generateImage,
   generateImagesForScenes,
   generateVideo,
+  generateVideoViaMake,
   mergeVideos
 } = require('../services/scriptService');
 
@@ -102,12 +103,13 @@ router.post('/generate-video', async (req, res) => {
   const { imageDescription, imageUrl } = req.body;
   try {
     const videoPrompt = await generateVideoPrompt(imageDescription);
-    const videoUrl = await generateVideo(imageUrl, videoPrompt);
+    const videoUrl = await generateVideoViaMake(imageUrl, videoPrompt);
     res.json({ videoUrl, prompt: videoPrompt });
   } catch (error) {
     res.status(500).json({ error: 'Failed to generate video' });
   }
 });
+
 
 router.post('/merge-videos', async (req, res) => {
   const { videoPaths, outputName } = req.body;
