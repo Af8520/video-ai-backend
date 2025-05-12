@@ -221,7 +221,7 @@ async function generateVideo(imageUrl, videoPrompt) {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
-        'Runway-API-Version': '2024-05-01'
+        'X-Runway-Version': '2024-11-06'
       }
     });
 
