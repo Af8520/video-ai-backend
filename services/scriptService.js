@@ -1,5 +1,6 @@
 const OpenAI = require('openai');
 const axios = require('axios');
+const FormData = require('form-data');
 const fs = require('fs');
 const { exec } = require('child_process');
 const path = require('path');
@@ -136,11 +137,32 @@ async function generateVideoPrompt(imageDescription) {
   return response.choices[0].message.content.trim();
 }
 
+
 async function generateImage(imagePrompt) {
-  // Placeholder – replace with actual Ideogram API integration
-  const mockUrl = `https://api.ideogram.ai/generate?prompt=${encodeURIComponent(imagePrompt)}`;
-  return mockUrl;
+  const form = new FormData();
+  form.append('prompt', imagePrompt);
+  form.append('rendering_speed', 'TURBO'); // אפשר גם DEFAULT או QUALITY
+
+  try {
+    const response = await axios.post(
+      'https://api.ideogram.ai/v1/ideogram-v3/generate',
+      form,
+      {
+        headers: {
+          ...form.getHeaders(),
+          'Api-Key': process.env.IDEOGRAM_API_KEY // שים את המפתח ב־.env שלך
+        }
+      }
+    );
+
+    const imageUrl = response.data.data[0].url;
+    return imageUrl;
+  } catch (error) {
+    console.error('🛑 Ideogram API Error:', error.response?.data || error.message);
+    throw new Error('Image generation failed');
+  }
 }
+
 
 async function generateVideo(imageUrl, videoPrompt) {
   // Placeholder – replace with actual Runway API integration
