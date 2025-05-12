@@ -206,14 +206,15 @@ async function generateImagesForScenes(scenes) {
 
 
 async function generateVideo(imageUrl, videoPrompt) {
-  const apiKey = process.env.RUNWAY_API_KEY; // ודא שה־API Key שלך מוגדר במשתני הסביבה
-  const endpoint = 'https://api.runwayml.com/v1/gen3-alpha-turbo';
+  const apiKey = process.env.RUNWAY_API_KEY;
+  const endpoint = 'https://api.runwayml.com/v1/image_to_video';
 
   const payload = {
-    promptText: videoPrompt,
     promptImage: imageUrl,
-    duration: 5, // משך הווידאו בשניות (5 או 10)
-    ratio: '16:9' // יחס גובה-רוחב: '16:9' או '9:16'
+    promptText: videoPrompt,
+    model: 'gen4_turbo',
+    duration: 5,
+    ratio: '1280:720'
   };
 
   try {
@@ -225,13 +226,51 @@ async function generateVideo(imageUrl, videoPrompt) {
       }
     });
 
-    const videoUrl = response.data.videoUrl; // הנח שה־API מחזיר את כתובת הווידאו כאן
+    const videoId = response.data.id;
+    const videoUrl = await pollRunwayForVideoUrl(videoId); // 👈 מחכה שהווידאו יהיה מוכן
+
     return videoUrl;
+
   } catch (error) {
-  console.error('🛑 Runway API Error:', error.response?.data || error.message);
-  throw new Error('Video generation failed');
+    console.error('🛑 Runway Video Error:', error.response?.data || error.message);
+    throw new Error('Video generation failed');
+  }
 }
+
+async function pollRunwayForVideoUrl(id, maxAttempts = 20, intervalMs = 3000) {
+  const apiKey = process.env.RUNWAY_API_KEY;
+  const endpoint = `https://api.runwayml.com/v1/image_to_video/${id}`;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const response = await axios.get(endpoint, {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'X-Runway-Version': '2024-11-06'
+        }
+      });
+
+      const status = response.data.status;
+
+      if (status === 'succeeded') {
+        return response.data.output?.videoUri;
+      } else if (status === 'failed') {
+        throw new Error('Video generation failed at Runway');
+      }
+
+      // אם עדיין בתהליך - נמתין קצת
+      await new Promise(resolve => setTimeout(resolve, intervalMs));
+
+    } catch (error) {
+      console.error(`❌ Runway Polling Error [Attempt ${attempt + 1}]:`, error.response?.data || error.message);
+      throw new Error('Polling for video failed');
+    }
+  }
+
+  throw new Error('Video generation timed out');
 }
+
+
 
 
 async function mergeVideos(videoPaths, outputName = 'final_output.mp4') {
