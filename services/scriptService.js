@@ -1,50 +1,49 @@
-const { Configuration, OpenAIApi } = require('openai');
+const OpenAI = require('openai');
 const axios = require('axios');
 const fs = require('fs');
 const { exec } = require('child_process');
 const path = require('path');
 
-const configuration = new Configuration({
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-const openai = new OpenAIApi(configuration);
 
 async function generateScripts(description) {
   const prompt = `You are a video scriptwriter. Create 2 short ad scripts for the following business: "${description}"`;
-  const response = await openai.createChatCompletion({
+  const response = await openai.chat.completions.create({
     model: 'gpt-4',
     messages: [{ role: 'user', content: prompt }],
   });
-  const content = response.data.choices[0].message.content;
+  const content = response.choices[0].message.content;
   return content.split(/\n\n+/).slice(0, 2);
 }
 
 async function breakdownToScenes(script) {
   const prompt = `Break down the following ad script into clear individual video scenes. Number them and keep each scene short and visual:\n\n"${script}"`;
-  const response = await openai.createChatCompletion({
+  const response = await openai.chat.completions.create({
     model: 'gpt-4',
     messages: [{ role: 'user', content: prompt }],
   });
-  const content = response.data.choices[0].message.content;
+  const content = response.choices[0].message.content;
   return content.split(/\n(?=\d+\.\s)/).map(s => s.trim());
 }
 
 async function generateImagePrompt(sceneText) {
   const prompt = `Describe the following scene in a single sentence suitable for AI image generation (Ideogram):\n\n"${sceneText}"`;
-  const response = await openai.createChatCompletion({
+  const response = await openai.chat.completions.create({
     model: 'gpt-4',
     messages: [{ role: 'user', content: prompt }],
   });
-  return response.data.choices[0].message.content.trim();
+  return response.choices[0].message.content.trim();
 }
 
 async function generateVideoPrompt(imageDescription) {
   const prompt = `Convert the following image description into a short video generation prompt for Runway, including camera movement and visual effects:\n\n"${imageDescription}"`;
-  const response = await openai.createChatCompletion({
+  const response = await openai.chat.completions.create({
     model: 'gpt-4',
     messages: [{ role: 'user', content: prompt }],
   });
-  return response.data.choices[0].message.content.trim();
+  return response.choices[0].message.content.trim();
 }
 
 async function generateImage(imagePrompt) {
