@@ -104,14 +104,18 @@ async function breakdownToScenes(script, lang = 'en') {
   });
 
   const content = response.choices[0].message.content;
-  const splitRegex = lang === 'he' ? /\n(?=\d+\.\s)/ : /\n(?=Scene\s?\d)/i;
 
-return content
-  .split(/\n/)
-  .map(s => s.trim())
-  .filter(s => /^(\d+\.\s|Scene\s?\d)/i.test(s));
+  // פיצול לפי כותרות סצנה (עברית או אנגלית)
+  const splitRegex = lang === 'he'
+    ? /\n(?=\d+\.\s)/
+    : /\n(?=Scene\s?\d)/i;
 
+  return content
+    .split(splitRegex)
+    .map(s => s.trim())
+    .filter(s => /^(\d+\.\s|Scene\s?\d)/i.test(s)); // מחזיר רק שורות שמתחילות בסצנה
 }
+
 
 
 async function generateImagePrompt(sceneText) {
