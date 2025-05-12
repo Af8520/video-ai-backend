@@ -163,6 +163,23 @@ async function generateImage(imagePrompt) {
   }
 }
 
+async function generateImagesForScenes(scenes) {
+  const results = [];
+
+  for (const sceneText of scenes) {
+    try {
+      const imagePrompt = await generateImagePrompt(sceneText);
+      const imageUrl = await generateImage(imagePrompt);
+      results.push({ sceneText, prompt: imagePrompt, imageUrl });
+    } catch (error) {
+      console.error(`❌ Error generating image for scene: "${sceneText}"`, error.message);
+      results.push({ sceneText, error: true });
+    }
+  }
+
+  return results;
+}
+
 
 async function generateVideo(imageUrl, videoPrompt) {
   // Placeholder – replace with actual Runway API integration
@@ -190,6 +207,7 @@ module.exports = {
   generateImagePrompt,
   generateVideoPrompt,
   generateImage,
+  generateImagesForScenes,
   generateVideo,
   mergeVideos
 };
