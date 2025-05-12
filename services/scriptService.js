@@ -296,5 +296,6 @@ module.exports = {
   generateImagesForScenes,
   generateVideoPromptsForImages,
   generateVideo,
+  pollRunwayForVideoUrl,
   mergeVideos
 };
