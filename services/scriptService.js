@@ -279,7 +279,10 @@ async function generateVideoViaMake(imageUrl, videoPrompt) {
       imageUrl: imageUrl
     });
 
-    const [videoUrl] = response.data; // כי זה מגיע כמערך
+    console.log('🛬 Full response from Make:', response.data);
+
+
+    const videoUrl = response.data.video;
     return videoUrl;
 
   } catch (error) {
