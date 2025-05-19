@@ -279,7 +279,8 @@ async function generateVideoViaMake(imageUrl, videoPrompt) {
       imageUrl: imageUrl
     });
 
-    console.log('🛬 Full response from Make:', response.data);
+    console.log("🧾 Full response from Make:", JSON.stringify(response.data, null, 2));
+
 
     const [videoUrl] = response.data; // ❗️כאן התיקון - שליפת ה-URL מתוך מערך
     return videoUrl;
