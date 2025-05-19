@@ -279,10 +279,9 @@ async function generateVideoViaMake(imageUrl, videoPrompt) {
       imageUrl: imageUrl
     });
 
-    console.log("🧾 Full response from Make:", JSON.stringify(response.data, null, 2));
+    console.log('🧾 Full response from Make:', response.data);
 
-
-    const [videoUrl] = response.data; // ❗️כאן התיקון - שליפת ה-URL מתוך מערך
+    const videoUrl = response.data; // עכשיו זהו URL ישיר כ-string
     return videoUrl;
 
   } catch (error) {
@@ -290,6 +289,7 @@ async function generateVideoViaMake(imageUrl, videoPrompt) {
     throw new Error('Video generation via Make failed');
   }
 }
+
 
 
 
