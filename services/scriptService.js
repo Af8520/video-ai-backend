@@ -271,7 +271,7 @@ async function pollRunwayForVideoUrl(id, maxAttempts = 20, intervalMs = 3000) {
 }
 
 async function generateVideoViaMake(imageUrl, videoPrompt) {
-  const webhookUrl = 'https://hook.eu2.make.com/67ikod2tfa7oujcx49vmd42tyxr213kt'; // ← ה-Webhook שלך
+  const webhookUrl = 'https://hook.eu2.make.com/67ikod2tfa7oujcx49vmd42tyxr213kt';
 
   try {
     const response = await axios.post(webhookUrl, {
@@ -281,8 +281,7 @@ async function generateVideoViaMake(imageUrl, videoPrompt) {
 
     console.log('🛬 Full response from Make:', response.data);
 
-
-    const videoUrl = response.data.video;
+    const [videoUrl] = response.data; // ❗️כאן התיקון - שליפת ה-URL מתוך מערך
     return videoUrl;
 
   } catch (error) {
