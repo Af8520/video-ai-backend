@@ -277,11 +277,16 @@ async function generateVideoViaMake(imageUrl, videoPrompt) {
     const response = await axios.post(webhookUrl, {
       prompt: videoPrompt,
       imageUrl: imageUrl
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      responseType: 'text' // 🔥 חשוב — כי Make מחזיר טקסט ולא JSON
     });
 
     console.log('🧾 Full response from Make:', response.data);
 
-    const videoUrl = response.data; // עכשיו זהו URL ישיר כ-string
+    const videoUrl = response.data; // פשוט טקסט
     return videoUrl;
 
   } catch (error) {
@@ -289,6 +294,7 @@ async function generateVideoViaMake(imageUrl, videoPrompt) {
     throw new Error('Video generation via Make failed');
   }
 }
+
 
 
 
